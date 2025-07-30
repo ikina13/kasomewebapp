@@ -184,7 +184,7 @@ export default function CoursePage({ params }: { params: { id: string } }) {
     toast.info("Preparing payment, please wait...", { duration: 5000 });
 
     try {
-        const response = await fetch('http://45.79.205.240/api/users/payment/token', {
+        const response = await fetch('http://45.79.205.240/api/users/payment/tokeni', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -200,9 +200,9 @@ export default function CoursePage({ params }: { params: { id: string } }) {
         const result: BackendPaymentTokenResponse = await response.json();
 
         if (response.ok && result.status === "SUCCESS" && result.token) {
-            const dpoPaymentUrl = `https://secure.3gdirectpay.com/payv3.php?ID=${result.token}`;
-            toast.success("Redirecting to DPO payment page...", { duration: 3000 });
-            window.location.href = dpoPaymentUrl;
+           // const dpoPaymentUrl = `https://secure.3gdirectpay.com/payv3.php?ID=${result.token}`;
+           // toast.success("Redirecting to DPO payment page...", { duration: 3000 });
+          //  window.location.href = dpoPaymentUrl;
         } else {
             toast.error(result.message || "Failed to initiate payment.");
             console.error("Error from backend payment token API:", result.message);
