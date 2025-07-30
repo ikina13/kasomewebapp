@@ -1,6 +1,7 @@
+// CoursePage.tsx
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } => {
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -10,16 +11,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner" // Assuming sonner is set up
 
-// --- Interfaces ---
+// --- Interfaces (unchanged) ---
 interface VideoClip {
-  id: number; // Database ID for the clip
+  id: number;
   name: string;
   otp: string;
   status: string;
   playbackInfo: string;
   thumbnail: string;
   practical_video_id: number;
-  video_id: string; // VdoCipher VIDEO ID (e.g., "c6f00963ffc84356b78ffa792711fba9")
+  video_id: string;
   created_at: string;
   created_by: number | null;
   updated_at: string | null;
@@ -32,7 +33,7 @@ interface VideoClip {
 }
 
 interface FetchedCourse {
-  id: number; // <--- This is the Course ID (e.g., 68)
+  id: number;
   name: string;
   status: string;
   thumbnail: string;
@@ -40,7 +41,7 @@ interface FetchedCourse {
   created_by: number;
   updated_at: string;
   updated_by: number;
-  price: number; // Course price
+  price: number;
   author: string;
   class_id: number;
   subject_id: number;
@@ -59,12 +60,12 @@ interface CourseApiResponse {
 interface BackendPaymentTokenResponse {
     status: string;
     code: string;
-    token?: string; // The DPO TransToken
+    token?: string;
     message: string;
 }
 
 export default function CoursePage({ params }: { params: { id: string } }) {
-  const courseId = params.id; // This is the Course ID from the URL (e.g., 68)
+  const courseId = params.id;
   const router = useRouter();
 
   const [course, setCourse] = useState<FetchedCourse | null>(null);
@@ -163,10 +164,9 @@ export default function CoursePage({ params }: { params: { id: string } }) {
     }
   };
 
-  // --- handleProceedToPay function (CORRECTED TO USE COURSE ID) ---
+  // --- handleProceedToPay function (UPDATED TO INCLUDE request_from_portal) ---
   const handleProceedToPay = async () => {
-    // We need 'course' object to get the course ID and main course price
-    if (!selectedVideo || !course) { // Ensure both selected video and course are available
+    if (!selectedVideo || !course) {
       toast.error("Course or video not fully loaded for payment.");
       return;
     }
@@ -191,10 +191,9 @@ export default function CoursePage({ params }: { params: { id: string } }) {
                 'Authorization': `Bearer ${authToken}`,
             },
             body: JSON.stringify({
-                // --- CORRECTED: Pass the main Course ID (e.g., 68) ---
-                video_id: course.id, // Assuming 'video_id' in API means 'course_id' now
-                // --- Also ensure the price is the main course price if paying for the whole course ---
-                amount: course.price, // Use course's main price
+                video_id: course.id,
+                amount: course.price,
+                request_from_portal: true, // <--- NEW: Send this boolean to your backend
             }),
         });
 
@@ -446,33 +445,33 @@ export default function CoursePage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* Payment Modal */}
-      {showPaymentModal && selectedVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold">Purchase Video: {selectedVideo.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center text-gray-700">
-                {/* IMPORTANT: If paying for the whole course, use course.price here */}
-                <p className="text-2xl font-bold text-blue-600 mb-4">TSh {course?.price?.toLocaleString() || selectedVideo.price.toLocaleString()}</p>
-                <p className="text-lg font-semibold mb-2">All payments are on monthly basis.</p>
-                <p>After each month, you will need to make a new payment.</p>
-              </div>
+     {/* Payment Modal */}
+      {showPaymentModal && selectedVideo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold">Purchase Video: {selectedVideo.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center text-gray-700">
+                {/* IMPORTANT: If paying for the whole course, use course.price here */}
+                <p className="text-2xl font-bold text-blue-600 mb-4">TSh {course?.price?.toLocaleString() || selectedVideo.price.toLocaleString()}</p>
+                <p className="text-lg font-semibold mb-2">All payments are on monthly basis.</p>
+                <p>After each month, you will need to make a new payment.</p>
+              </div>
 
-              <div className="flex space-x-3 mt-6">
-                <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setShowPaymentModal(false)}>
-                  Cancel
-                </Button>
-                <Button className="flex-1 bg-yellow-500 hover:bg-yellow-600" onClick={handleProceedToPay}>
-                  Proceed to Pay
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
-  );
+              <div className="flex space-x-3 mt-6">
+                <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setShowPaymentModal(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-yellow-500 hover:bg-yellow-600" onClick={handleProceedToPay}>
+                  Proceed to Pay
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
 }
