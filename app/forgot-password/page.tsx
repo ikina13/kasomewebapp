@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
               {isSubmitted ? "Check Your Email" : "Forgot Password?"}
             </CardTitle>
             <p className="text-center text-gray-600">
-              {isSubmitted 
+              {isSubmitted
                 ? "We've sent a password reset link to your email address."
                 : "Enter your email address and we'll send you a link to reset your password."
               }
@@ -71,8 +71,8 @@ export default function ForgotPasswordPage() {
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors"
                 >
                   Send Reset Link
@@ -93,5 +93,21 @@ export default function ForgotPasswordPage() {
                 
                 <div className="text-sm text-gray-600 space-y-2">
                   <p>Didn't receive the email? Check your spam folder.</p>
-                  <Button 
-                    variant="ghost" \
+                  {/* --- CORRECTED BUTTON BLOCK --- */}
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsSubmitted(false)} // Example: allows resubmitting the form
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Resend Email
+                  </Button>
+                  {/* --- END CORRECTED BUTTON BLOCK --- */}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

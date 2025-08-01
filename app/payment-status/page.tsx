@@ -6,111 +6,120 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Loader2, Home, LayoutDashboard, ExternalLink } from 'lucide-react'; // Added Home, LayoutDashboard, ExternalLink
-import { toast } from 'sonner'; // Assuming sonner is installed
+import { CheckCircle, Loader2, Home, LayoutDashboard, Play, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [status, setStatus] = useState<'success' | 'pending' | 'loading'>('loading');
-  const [message, setMessage] = useState('Confirming your payment status...');
-  const [transId, setTransId] = useState<string | null>(null);
-  const [courseIdToRedirect, setCourseIdToRedirect] = useState<string | null>(null);
+  // Simplified status management as we're mostly just redirecting
+  const [message, setMessage] = useState('Processing your payment status...');
   const [redirecting, setRedirecting] = useState(false);
+  const [isSuccessDisplayed, setIsSuccessDisplayed] = useState(false); // To ensure success message shows briefly
+
+  // --- getTitle helper function (unchanged) ---
+  const getTitle = () => {
+    const stat = searchParams.get('stat');
+    if (stat === '000') return 'Payment Successful!';
+    return 'Confirming Payment...';
+  };
+  // --- End getTitle helper function ---
 
   useEffect(() => {
-    const stat = searchParams.get('stat'); // DPO parameter for payment status ('000' for success)
+    const dpoStat = searchParams.get('stat'); // DPO parameter for payment status ('000' for success)
     const transidParam = searchParams.get('TransID'); // DPO parameter for transaction ID
-    const companyRefParam = searchParams.get('CompanyRef'); // YOUR CompanyRef from DPO
+    const companyRefParam = searchParams.get('CompanyRef'); // YOUR CompanyRef from DPO (for courseId/playVideoId)
 
-    setTransId(transidParam);
+    // Parse courseId and playVideoId from CompanyRef or other params if sent
+    let courseIdToRedirect: string | null = null;
+    let playVideoIdToRedirect: string | null = null;
 
-    let videoIdFromRef: string | null = null;
     if (companyRefParam) {
-      // Assuming your CompanyRef format is "KASOME-<video_id/course_id>-<UNIQUE_ID>"
       const refParts = companyRefParam.split('-');
       if (refParts.length >= 2 && refParts[0] === 'KASOME' && refParts[1]) {
-        videoIdFromRef = refParts[1]; // Extract video/course ID from CompanyRef
+        courseIdToRedirect = refParts[1];
+        // If your CompanyRef also contains videoId directly, parse it here
+        // e.g., "KASOME-<course_id>-<video_id>-<UNIQUE_ID>"
+        if (refParts.length >= 3 && refParts[2]) {
+             playVideoIdToRedirect = refParts[2];
+        }
       }
     }
-    setCourseIdToRedirect(videoIdFromRef); // Set this to state for later use
+    // Alternatively, if courseId and playVideoId are sent as direct URL params to payment-success, retrieve them here:
+    const directCourseId = searchParams.get('courseId');
+    const directPlayVideoId = searchParams.get('playVideoId');
+    if (directCourseId) courseIdToRedirect = directCourseId;
+    if (directPlayVideoId) playVideoIdToRedirect = directPlayVideoId;
 
-    if (stat === '000') {
-      setStatus('success');
-      setMessage('Payment successful! Your access has been granted.');
-      toast.success('Payment successful!', { description: 'Access granted!' });
 
-      if (videoIdFromRef) {
-        setRedirecting(true);
-        setMessage('Payment successful! Redirecting you to your course now...');
-        setTimeout(() => {
-          router.push(`/course/${videoIdFromRef}`); // Redirect to the specific course
-        }, 5000); // Redirect after 5 seconds
-      }
+    if (dpoStat === '000') {
+      setIsSuccessDisplayed(true); // Indicate success state for rendering
+      setMessage('Payment successful! Returning to previous page.');
+      toast.success('Payment successful!', { description: `Transaction ID: ${transidParam || 'N/A'}` });
+
+      setRedirecting(true); // Activate redirection state
+
+      // --- CRITICAL CHANGE: Redirect back after 1 second ---
+      setTimeout(() => {
+        router.back(); // Go back to the previous page in history
+        // If you specifically wanted to go to a course page, even for a "back" action,
+        // you would use: router.replace(`/course/${courseIdToRedirect}?playVideoId=${playVideoIdToRedirect || ''}`);
+        // But "go back" implies to the page *before* payment.
+      }, 1000); // 1 second delay
+      // --- END CRITICAL CHANGE ---
+
     } else {
-      // If DPO sends anything other than '000' to RedirectURL, it's generally a failure or cancellation.
-      // We'll redirect to a dedicated failure page for clearer messaging.
-      const failureMessage = `Payment failed or was canceled. Status: ${stat || 'N/A'}.`;
+      // If DPO sends anything other than '000' to RedirectURL,
+      // immediately redirect to the failure page without delay.
+      const failureMessage = `Payment failed or was canceled. Status: ${dpoStat || 'N/A'}.`;
       toast.error('Payment Failed', { description: failureMessage });
-      router.replace(`/payment-failure?status=${stat || 'N/A'}&transId=${transidParam || ''}`);
-      return; // Stop execution here as we're redirecting
+      router.replace(`/payment-failure?status=${dpoStat || 'N/A'}&transId=${transidParam || ''}&CompanyRef=${companyRefParam || ''}&courseId=${courseIdToRedirect || ''}&playVideoId=${playVideoIdToRedirect || ''}`);
     }
 
-    // Optional: Final server-side confirmation (good practice but less critical than BackURL)
-    // if (transidParam) {
-    //   fetch(`/api/payment/confirm-status?transId=${transidParam}`)
-    //     .then(res => res.json())
-    //     .then(data => { /* Handle confirmation response */ })
-    //     .catch(err => console.error("Error confirming payment:", err));
-    // }
+    // No need for optional confirmation fetches in this simplified "go back" flow
 
-  }, [searchParams, router]);
+  }, [searchParams, router]); // Dependencies to ensure effect runs when URL or router state changes
 
   const renderIcon = () => {
-    if (status === 'loading' || redirecting) {
+    if (redirecting) { // Show loader while redirecting
       return <Loader2 className="h-16 w-16 text-green-500 animate-spin mx-auto mb-6" />;
-    } else if (status === 'success') {
+    } else if (isSuccessDisplayed) { // Show success icon if payment was successful
       return <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-6" />;
     }
-    // No other icons needed here, as non-success redirects to payment-failure
+    // No other icons here, as non-success immediately redirects to payment-failure
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center p-4">
-      <Card className={`w-full max-w-md text-center border-2 border-green-400 shadow-xl`}>
+      <Card className={`w-full max-w-md text-center border-2 ${isSuccessDisplayed ? 'border-green-400' : 'border-gray-300'} shadow-xl`}>
         <CardHeader className="pt-8">
           {renderIcon()}
           <CardTitle className="text-3xl font-bold text-green-800">{getTitle()}</CardTitle>
         </CardHeader>
         <CardContent className="pb-8">
           <p className="text-lg text-gray-700 mb-6">{message}</p>
-          {transId && <p className="text-sm text-gray-500 mb-4">Transaction ID: <span className="font-medium text-gray-800">{transId}</span></p>}
           
+          {/* We only show a simple message and auto-redirect for success */}
+          {/* No manual buttons if auto-redirecting */}
+          {/* If you need TransId or CourseId displayed briefly before redirect, add them here */}
+          {/* {searchParams.get('TransID') && <p className="text-sm text-gray-500 mb-4">Transaction ID: <span className="font-medium text-gray-800">{searchParams.get('TransID')}</span></p>} */}
+          {/* {courseIdToRedirect && <p className="text-sm text-gray-500 mb-4">Course ID: <span className="font-medium text-gray-800">{courseIdToRedirect}</span></p>} */}
+
           <div className="space-y-4 pt-4">
-            {!redirecting ? (
-              <>
-                {courseIdToRedirect && (
-                  <Link href={`/course/${courseIdToRedirect}`} passHref>
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white text-lg py-3">
-                      <Play className="mr-2 h-5 w-5" /> Continue to Course
-                    </Button>
-                  </Link>
-                )}
-                <Link href="/dashboard" passHref>
-                  <Button variant="outline" className="w-full border-2 border-blue-500 text-blue-600 hover:bg-blue-50 text-lg py-3">
-                    <LayoutDashboard className="mr-2 h-5 w-5" /> Go to Dashboard
-                  </Button>
-                </Link>
-                <Link href="/" passHref>
-                  <Button variant="ghost" className="w-full text-gray-600 hover:text-gray-900 text-lg py-3">
-                    <Home className="mr-2 h-5 w-5" /> Back to Home
-                  </Button>
-                </Link>
-              </>
-            ) : (
+            {/* The primary action is the automatic redirect */}
+            {redirecting ? (
                 <div className="text-gray-600 text-base">
-                    Please wait, you're being redirected automatically.
+                    Returning to previous page automatically...
+                </div>
+            ) : (
+                // Fallback content if for some reason redirection doesn't trigger immediately
+                // This shouldn't be seen if stat=000 and redirection is set
+                <div className="text-gray-600 text-base">
+                    If not redirected, please use the buttons below.
+                    <Link href="/dashboard" passHref>
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 mt-4">Go to Dashboard</Button>
+                    </Link>
                 </div>
             )}
           </div>
@@ -118,12 +127,4 @@ export default function PaymentSuccessPage() {
       </Card>
     </div>
   );
-}
-
-// Helper to avoid duplicate code for getTitle
-function getTitle() {
-  const searchParams = useSearchParams(); // Needs to be called inside the component or custom hook
-  const stat = searchParams.get('stat');
-  if (stat === '000') return 'Payment Successful!';
-  return 'Confirming Payment...'; // For initial state or non-000 before redirecting to failure page
 }

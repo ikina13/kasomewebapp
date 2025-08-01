@@ -1,7 +1,6 @@
-// CoursePage.tsx
 "use client"
 
-import { useState, useEffect } => {
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -164,7 +163,7 @@ export default function CoursePage({ params }: { params: { id: string } }) {
     }
   };
 
-  // --- handleProceedToPay function (UPDATED TO INCLUDE request_from_portal) ---
+  // --- handleProceedToPay function (UNCOMMENTED) ---
   const handleProceedToPay = async () => {
     if (!selectedVideo || !course) {
       toast.error("Course or video not fully loaded for payment.");
@@ -183,26 +182,27 @@ export default function CoursePage({ params }: { params: { id: string } }) {
     setShowPaymentModal(false); // Close modal immediately
     toast.info("Preparing payment, please wait...", { duration: 5000 });
 
+    // --- UNCOMMENTED CODE BLOCK ---
     try {
-        const response = await fetch('http://45.79.205.240/api/users/payment/tokeni', {
+        const response = await fetch('http://45.79.205.240/api/users/payment/token', { // Correct URL: no 'i' at the end
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`,
             },
             body: JSON.stringify({
-                video_id: course.id,
-                amount: course.price,
-                request_from_portal: true, // <--- NEW: Send this boolean to your backend
+                video_id: course.id, // Sending Course ID
+                amount: course.price, // Sending Course Price
+                request_from_portal: true, // Sending portal flag
             }),
         });
 
         const result: BackendPaymentTokenResponse = await response.json();
 
         if (response.ok && result.status === "SUCCESS" && result.token) {
-           // const dpoPaymentUrl = `https://secure.3gdirectpay.com/payv3.php?ID=${result.token}`;
-           // toast.success("Redirecting to DPO payment page...", { duration: 3000 });
-          //  window.location.href = dpoPaymentUrl;
+            const dpoPaymentUrl = `https://secure.3gdirectpay.com/payv3.php?ID=${result.token}`;
+            toast.success("Redirecting to DPO payment page...", { duration: 3000 });
+            window.location.href = dpoPaymentUrl;
         } else {
             toast.error(result.message || "Failed to initiate payment.");
             console.error("Error from backend payment token API:", result.message);
@@ -211,6 +211,7 @@ export default function CoursePage({ params }: { params: { id: string } }) {
         toast.error(`Payment initiation failed: ${error.message || "Network error"}`);
         console.error("Error during call to backend payment token API:", error);
     }
+    // --- END UNCOMMENTED CODE BLOCK ---
   };
   // --- END handleProceedToPay function ---
 
@@ -445,33 +446,33 @@ export default function CoursePage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-     {/* Payment Modal */}
-      {showPaymentModal && selectedVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold">Purchase Video: {selectedVideo.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center text-gray-700">
-                {/* IMPORTANT: If paying for the whole course, use course.price here */}
-                <p className="text-2xl font-bold text-blue-600 mb-4">TSh {course?.price?.toLocaleString() || selectedVideo.price.toLocaleString()}</p>
-                <p className="text-lg font-semibold mb-2">All payments are on monthly basis.</p>
-                <p>After each month, you will need to make a new payment.</p>
-              </div>
+     {/* Payment Modal */}
+      {showPaymentModal && selectedVideo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold">Purchase Video: {selectedVideo.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center text-gray-700">
+                {/* IMPORTANT: If paying for the whole course, use course.price here */}
+                <p className="text-2xl font-bold text-blue-600 mb-4">TSh {course?.price?.toLocaleString() || selectedVideo.price.toLocaleString()}</p>
+                <p className="text-lg font-semibold mb-2">All payments are on monthly basis.</p>
+                <p>After each month, you will need to make a new payment.</p>
+              </div>
 
-              <div className="flex space-x-3 mt-6">
-                <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setShowPaymentModal(false)}>
-                  Cancel
-                </Button>
-                <Button className="flex-1 bg-yellow-500 hover:bg-yellow-600" onClick={handleProceedToPay}>
-                  Proceed to Pay
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
-  );
+              <div className="flex space-x-3 mt-6">
+                <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setShowPaymentModal(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-yellow-500 hover:bg-yellow-600" onClick={handleProceedToPay}>
+                  Proceed to Pay
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
 }
