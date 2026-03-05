@@ -1,10 +1,12 @@
 # Project Title
 
-Simple overview of use/purpose.
+Kasome
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+Kasome is an online video learning library that provides students with high-quality tuition sessions anytime, anywhere. Our platform produces and uploads professionally recorded lessons to our website and mobile app, making secondary education more accessible and easier to understand.
+
+By connecting Tanzania's most experienced and professional teachers with students through online video technology, Kasome helps bridge the education gap and ensures that every learner has the opportunity to succeed.
 
 ## Getting Started
 
