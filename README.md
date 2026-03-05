@@ -1,30 +1,63 @@
-# Tailwind CSS Design
+# Project Title
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+Simple overview of use/purpose.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/mapundaikina-gmailcoms-projects/v0-tailwind-css-design)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/6DelJkpZZbO)
+## Description
 
-## Overview
+An in-depth paragraph about your project and overview of use.
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## Getting Started
 
-## Deployment
+### Dependencies
 
-Your project is live at:
+* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
+* ex. Windows 10
 
-**[https://vercel.com/mapundaikina-gmailcoms-projects/v0-tailwind-css-design](https://vercel.com/mapundaikina-gmailcoms-projects/v0-tailwind-css-design)**
+### Installing
 
-## Build your app
+* How/where to download your program
+* Any modifications needed to be made to files/folders
 
-Continue building your app on:
+### Executing program
 
-**[https://v0.dev/chat/projects/6DelJkpZZbO](https://v0.dev/chat/projects/6DelJkpZZbO)**
+* How to run the program
+* Step-by-step bullets
+```
+code blocks for commands
+```
 
-## How It Works
+## Help
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
+Any advise for common problems or issues.
+```
+command to run if program contains helper info
+```
+
+## Authors
+
+Contributors names and contact info
+
+ex. Dominique Pizzie  
+ex. [@DomPizzie](https://twitter.com/dompizzie)
+
+## Version History
+
+* 0.2
+    * Various bug fixes and optimizations
+    * See [commit change]() or See [release history]()
+* 0.1
+    * Initial Release
+
+## License
+
+This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+
+## Acknowledgments
+
+Inspiration, code snippets, etc.
+* [awesome-readme](https://github.com/matiassingers/awesome-readme)
+* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
+* [dbader](https://github.com/dbader/readme-template)
+* [zenorocha](https://gist.github.com/zenorocha/4526327)
+* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
 4. Vercel deploys the latest version from this repository
