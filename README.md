@@ -10,7 +10,7 @@ By connecting Tanzania's most experienced and professional teachers with student
 
 ## Getting Started
 
-## Sotware used in deployement
+## Sotware used in programing
 1.Next js
 2.React
 3.Html
